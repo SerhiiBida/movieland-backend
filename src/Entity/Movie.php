@@ -137,6 +137,24 @@ class Movie
     }
 
     /**
+     * @param Country[] $countries
+     */
+    public function syncCountries(array $countries): static
+    {
+        foreach ($this->countries as $country) {
+            if (!in_array($country, $countries, true)) {
+                $this->removeCountry($country);
+            }
+        }
+
+        foreach ($countries as $country) {
+            $this->addCountry($country);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection<int, Genre>
      */
     public function getGenres(): Collection
@@ -158,6 +176,24 @@ class Movie
     {
         if ($this->genres->removeElement($genre)) {
             $genre->removeMovie($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Genre[] $genres
+     */
+    public function syncGenres(array $genres): static
+    {
+        foreach ($this->genres as $genre) {
+            if (!in_array($genre, $genres, true)) {
+                $this->removeGenre($genre);
+            }
+        }
+
+        foreach ($genres as $genre) {
+            $this->addGenre($genre);
         }
 
         return $this;
