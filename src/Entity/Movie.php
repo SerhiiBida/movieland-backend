@@ -6,6 +6,8 @@ use App\Repository\MovieRepository;
 use App\Trait\Entity\HasSoftDelete;
 use App\Trait\Entity\HasTimestamp;
 use App\Trait\Entity\HasPublished;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
@@ -35,6 +37,24 @@ class Movie
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $releaseDate = null;
+
+    /**
+     * @var Collection<int, Country>
+     */
+    #[ORM\ManyToMany(targetEntity: Country::class, inversedBy: 'movies')]
+    private Collection $countries;
+
+    /**
+     * @var Collection<int, Genre>
+     */
+    #[ORM\ManyToMany(targetEntity: Genre::class, inversedBy: 'movies')]
+    private Collection $genres;
+
+    public function __construct()
+    {
+        $this->countries = new ArrayCollection();
+        $this->genres = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -85,6 +105,60 @@ class Movie
     public function setReleaseDate(?\DateTime $releaseDate): static
     {
         $this->releaseDate = $releaseDate;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Country>
+     */
+    public function getCountries(): Collection
+    {
+        return $this->countries;
+    }
+
+    public function addCountry(Country $country): static
+    {
+        if (!$this->countries->contains($country)) {
+            $this->countries->add($country);
+            $country->addMovie($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCountry(Country $country): static
+    {
+        if ($this->countries->removeElement($country)) {
+            $country->removeMovie($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Genre>
+     */
+    public function getGenres(): Collection
+    {
+        return $this->genres;
+    }
+
+    public function addGenre(Genre $genre): static
+    {
+        if (!$this->genres->contains($genre)) {
+            $this->genres->add($genre);
+            $genre->addMovie($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGenre(Genre $genre): static
+    {
+        if ($this->genres->removeElement($genre)) {
+            $genre->removeMovie($this);
+        }
 
         return $this;
     }
